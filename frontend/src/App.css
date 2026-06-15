@@ -145,9 +145,23 @@ h1 {
 }
 
 .add-btn:disabled {
-  background: var(--surface-2);
-  color: var(--muted-2);
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.3);
   cursor: not-allowed;
+}
+
+.add-btn--loading {
+  background: rgba(245, 158, 11, 0.7);
+  cursor: wait;
+}
+
+.spin {
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 /* ── BOARD ────────────────────────────────────────────── */
