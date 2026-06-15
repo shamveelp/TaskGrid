@@ -1,31 +1,41 @@
-import { Task } from '../types/task';
+import { ITask, TaskStatus } from '../types/task';
+import { ITaskStore } from '../interfaces/task.interface';
 
-let tasks: Task[] = [];
-let nextId = 1;
+export class TaskStore implements ITaskStore {
+  private tasks: ITask[] = [];
+  private nextId = 1;
 
-export const taskStore = {
-  getAll: (): Task[] => tasks,
+  getAll(): ITask[] {
+    return this.tasks;
+  }
 
-  getById: (id: number): Task | undefined =>
-    tasks.find(t => t.id === id),
+  getById(id: number): ITask | undefined {
+    return this.tasks.find(t => t.id === id);
+  }
 
-  create: (title: string): Task => {
-    const task: Task = { id: nextId++, title: title.trim(), status: 'todo' };
-    tasks.push(task);
+  create(title: string): ITask {
+    const task: ITask = {
+      id: this.nextId++,
+      title: title.trim(),
+      status: 'todo',
+    };
+    this.tasks.push(task);
     return task;
-  },
+  }
 
-  updateStatus: (id: number, status: 'todo' | 'done'): Task | null => {
-    const task = tasks.find(t => t.id === id);
+  updateStatus(id: number, status: TaskStatus): ITask | null {
+    const task = this.tasks.find(t => t.id === id);
     if (!task) return null;
     task.status = status;
     return task;
-  },
+  }
 
-  remove: (id: number): boolean => {
-    const index = tasks.findIndex(t => t.id === id);
+  remove(id: number): boolean {
+    const index = this.tasks.findIndex(t => t.id === id);
     if (index === -1) return false;
-    tasks.splice(index, 1);
+    this.tasks.splice(index, 1);
     return true;
-  },
-};
+  }
+}
+
+export const taskStore = new TaskStore();

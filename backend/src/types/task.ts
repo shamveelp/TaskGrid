@@ -1,5 +1,7 @@
-export type Task = {
+export type TaskStatus = 'todo' | 'done';
+
+export interface ITask {
   id: number;
   title: string;
-  status: 'todo' | 'done';
-};
+  status: TaskStatus;
+}
