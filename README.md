@@ -2,7 +2,7 @@
 
 > A full-stack Mini Kanban Task Manager - clean architecture, scalable design, and a premium dark UI.
 
-![TaskGrid App Screenshot](./screenshot.png)
+![TaskGrid App Screenshot](./assets/screenshot.png)
 
 ---
 
@@ -180,14 +180,12 @@ App
 PORT=3000
 ```
 
-#### Frontend — `frontend/.env`
+#### Frontend - `frontend/.env`
 
 ```env
-# Base URL of the backend API (used by the axios service)
-BACKEND_URL=http://localhost:3000
+# Base URL of the backend API (must use VITE_ prefix for Vite to expose it)
+VITE_BACKEND_URL=http://localhost:3000
 ```
-
-> **Note:** The frontend currently hardcodes `http://localhost:3000/api` in `taskService.ts`. Update that value when deploying to production or replace it with `import.meta.env.VITE_BACKEND_URL` for full env-variable support.
 
 ---
 

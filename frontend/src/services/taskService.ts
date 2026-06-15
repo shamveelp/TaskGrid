@@ -1,8 +1,14 @@
 import axios from 'axios';
 import type { Task, CreateTaskPayload, UpdateTaskPayload } from '../types/task';
 
+const BASE_URL = import.meta.env.VITE_BACKEND_URL as string;
+
+if (!BASE_URL) {
+  console.warn('[taskService] VITE_BACKEND_URL is not set. API calls will fail.');
+}
+
 const api = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: `${BASE_URL}/api`,
   headers: { 'Content-Type': 'application/json' },
 });
 
