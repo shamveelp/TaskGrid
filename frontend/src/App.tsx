@@ -142,7 +142,7 @@ export default function App() {
               {todoTasks.length === 0 ? (
                 <div className="empty">
                   <Circle size={36} />
-                  <span>All clear — add something to start.</span>
+                  <span>All clear - add something to start.</span>
                 </div>
               ) : todoTasks.map(task => (
                 <div className="task-card" key={task.id}>
