@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import {
-  LayoutGrid,
   Plus,
   CheckCircle2,
   Circle,
@@ -91,9 +90,6 @@ export default function App() {
       {/* ── HEADER ── */}
       <header className="header">
         <div className="brand">
-          <div className="brand-icon">
-            <LayoutGrid size={22} />
-          </div>
           <div>
             <h1>TaskGrid</h1>
             <p className="tagline">Stay focused. Ship faster.</p>
@@ -184,7 +180,7 @@ export default function App() {
               {doneTasks.length === 0 ? (
                 <div className="empty">
                   <CheckCircle2 size={36} />
-                  <span>Nothing here yet — keep going!</span>
+                  <span>Nothing here yet - keep going!</span>
                 </div>
               ) : doneTasks.map(task => (
                 <div className="task-card" key={task.id}>
