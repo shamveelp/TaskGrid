@@ -15,7 +15,7 @@ type Task = {
   status: 'todo' | 'done';
 };
 
-const API_URL = 'http://localhost:3000/tasks';
+const API_URL = 'http://localhost:3000/api/tasks';
 
 export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
