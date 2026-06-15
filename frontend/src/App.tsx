@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle2, Circle, Trash2, Plus, ArrowRight, RotateCcw, ListTodo, ClipboardCheck } from 'lucide-react';
+import {
+  LayoutGrid,
+  Plus,
+  CheckCircle2,
+  Circle,
+  Trash2,
+  RotateCcw,
+  CheckCheck,
+} from 'lucide-react';
 import './App.css';
 
 type Task = {
@@ -10,188 +18,196 @@ type Task = {
 
 const API_URL = 'http://localhost:3000/tasks';
 
-function App() {
+export default function App() {
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [newTaskTitle, setNewTaskTitle] = useState('');
+  const [newTitle, setNewTitle] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const fetchTasks = async () => {
     try {
       setLoading(true);
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error('Failed to fetch tasks');
-      const data = await response.json();
-      setTasks(data);
+      const res = await fetch(API_URL);
+      if (!res.ok) throw new Error('Failed to fetch tasks');
+      setTasks(await res.json());
       setError(null);
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong');
+    } catch (e: any) {
+      setError(e.message);
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchTasks();
-  }, []);
+  useEffect(() => { fetchTasks(); }, []);
 
-  const handleAddTask = async (e: React.FormEvent) => {
+  const addTask = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newTaskTitle.trim()) return;
-
+    if (!newTitle.trim()) return;
     try {
-      const response = await fetch(API_URL, {
+      const res = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: newTaskTitle }),
+        body: JSON.stringify({ title: newTitle }),
       });
-
-      if (!response.ok) throw new Error('Failed to add task');
-      const newTask = await response.json();
-      setTasks([...tasks, newTask]);
-      setNewTaskTitle('');
-    } catch (err: any) {
-      setError(err.message || 'Failed to add task');
+      if (!res.ok) throw new Error('Failed to add task');
+      const task = await res.json();
+      setTasks(prev => [...prev, task]);
+      setNewTitle('');
+    } catch (e: any) {
+      setError(e.message);
     }
   };
 
-  const handleMoveTask = async (id: number, newStatus: 'todo' | 'done') => {
+  const moveTask = async (id: number, status: 'todo' | 'done') => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const res = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+        body: JSON.stringify({ status }),
       });
-
-      if (!response.ok) throw new Error('Failed to update task');
-      const updatedTask = await response.json();
-      
-      setTasks(tasks.map(task => (task.id === id ? updatedTask : task)));
-    } catch (err: any) {
-      setError(err.message || 'Failed to update task');
+      if (!res.ok) throw new Error('Failed to update task');
+      const updated = await res.json();
+      setTasks(prev => prev.map(t => (t.id === id ? updated : t)));
+    } catch (e: any) {
+      setError(e.message);
     }
   };
 
-  const handleDeleteTask = async (id: number) => {
+  const deleteTask = async (id: number) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Failed to delete task');
-      
-      setTasks(tasks.filter(task => task.id !== id));
-    } catch (err: any) {
-      setError(err.message || 'Failed to delete task');
+      const res = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete task');
+      setTasks(prev => prev.filter(t => t.id !== id));
+    } catch (e: any) {
+      setError(e.message);
     }
   };
 
-  const todoTasks = tasks.filter(task => task.status === 'todo');
-  const doneTasks = tasks.filter(task => task.status === 'done');
+  const todoTasks = tasks.filter(t => t.status === 'todo');
+  const doneTasks = tasks.filter(t => t.status === 'done');
 
   return (
-    <div className="app-container">
-      <header>
-        <h1>TaskGrid</h1>
+    <div className="app">
+      {/* ── HEADER ── */}
+      <header className="header">
+        <div className="brand">
+          <div className="brand-icon">
+            <LayoutGrid size={22} />
+          </div>
+          <div>
+            <h1>TaskGrid</h1>
+            <p className="tagline">Stay focused. Ship faster.</p>
+          </div>
+        </div>
+
+        <div className="stats-row">
+          <div className="stat">
+            <span className="stat-num" style={{ color: 'var(--amber)' }}>{todoTasks.length}</span>
+            <span className="stat-label">In Progress</span>
+          </div>
+          <div className="stat-divider" />
+          <div className="stat">
+            <span className="stat-num" style={{ color: 'var(--green)' }}>{doneTasks.length}</span>
+            <span className="stat-label">Completed</span>
+          </div>
+        </div>
       </header>
 
-      {error && <div className="error-message">{error}</div>}
+      {/* ── ADD TASK ── */}
+      <div className="add-section">
+        {error && <div className="error-banner">{error}</div>}
+        <form className="add-form" onSubmit={addTask}>
+          <input
+            className="add-input"
+            placeholder="Add a new task and press Enter…"
+            value={newTitle}
+            onChange={e => setNewTitle(e.target.value)}
+          />
+          <button className="add-btn" type="submit" disabled={!newTitle.trim()}>
+            <Plus size={18} />
+            Add Task
+          </button>
+        </form>
+      </div>
 
-      <form className="add-task-container" onSubmit={handleAddTask}>
-        <input
-          type="text"
-          className="add-task-input"
-          placeholder="What's next on your mind?"
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-        />
-        <button type="submit" className="add-btn" disabled={!newTaskTitle.trim()}>
-          <Plus size={20} />
-          <span>Add</span>
-        </button>
-      </form>
-
+      {/* ── BOARD ── */}
       {loading ? (
-        <div className="loading">Syncing Tasks...</div>
+        <div className="loading">Loading tasks…</div>
       ) : (
-        <div className="kanban-board">
-          {/* To Do Column */}
-          <div className="column column-todo">
-            <div className="column-header">
-              <div className="column-icon">
-                <ListTodo size={24} />
-              </div>
-              <span className="column-title">In Progress</span>
-              <span className="task-count">{todoTasks.length}</span>
+        <div className="board">
+          {/* TO DO */}
+          <div className="column col-todo">
+            <div className="col-head">
+              <span className="col-dot" />
+              <span className="col-title">In Progress</span>
+              <span className="col-badge">{todoTasks.length}</span>
             </div>
-            <div className="task-list">
-              {todoTasks.map(task => (
-                <div key={task.id} className="task-card">
+            <div className="col-body">
+              {todoTasks.length === 0 ? (
+                <div className="empty">
+                  <Circle size={36} />
+                  <span>All clear — add something to start.</span>
+                </div>
+              ) : todoTasks.map(task => (
+                <div className="task-card" key={task.id}>
+                  <Circle className="task-check" size={18} />
                   <span className="task-title">{task.title}</span>
                   <div className="task-actions">
                     <button
-                      className="action-btn move-btn"
-                      onClick={() => handleMoveTask(task.id, 'done')}
-                      title="Mark as Done"
+                      className="icon-btn move"
+                      title="Mark done"
+                      onClick={() => moveTask(task.id, 'done')}
                     >
-                      <CheckCircle2 size={20} />
+                      <CheckCheck size={16} />
                     </button>
                     <button
-                      className="action-btn delete-btn"
-                      onClick={() => handleDeleteTask(task.id)}
-                      title="Delete Task"
+                      className="icon-btn del"
+                      title="Delete"
+                      onClick={() => deleteTask(task.id)}
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
               ))}
-              {todoTasks.length === 0 && (
-                <div className="empty-state">
-                  <Circle size={32} />
-                  <span>Your canvas is clear.</span>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Done Column */}
-          <div className="column column-done">
-            <div className="column-header">
-              <div className="column-icon">
-                <ClipboardCheck size={24} />
-              </div>
-              <span className="column-title">Completed</span>
-              <span className="task-count">{doneTasks.length}</span>
+          {/* DONE */}
+          <div className="column col-done">
+            <div className="col-head">
+              <span className="col-dot" />
+              <span className="col-title">Completed</span>
+              <span className="col-badge">{doneTasks.length}</span>
             </div>
-            <div className="task-list">
-              {doneTasks.map(task => (
-                <div key={task.id} className="task-card done">
+            <div className="col-body">
+              {doneTasks.length === 0 ? (
+                <div className="empty">
+                  <CheckCircle2 size={36} />
+                  <span>Nothing here yet — keep going!</span>
+                </div>
+              ) : doneTasks.map(task => (
+                <div className="task-card" key={task.id}>
+                  <CheckCircle2 className="task-check" size={18} />
                   <span className="task-title">{task.title}</span>
                   <div className="task-actions">
                     <button
-                      className="action-btn move-btn"
-                      onClick={() => handleMoveTask(task.id, 'todo')}
-                      title="Move back to To Do"
+                      className="icon-btn move"
+                      title="Move back"
+                      onClick={() => moveTask(task.id, 'todo')}
                     >
-                      <RotateCcw size={20} />
+                      <RotateCcw size={16} />
                     </button>
                     <button
-                      className="action-btn delete-btn"
-                      onClick={() => handleDeleteTask(task.id)}
-                      title="Delete Task"
+                      className="icon-btn del"
+                      title="Delete"
+                      onClick={() => deleteTask(task.id)}
                     >
-                      <Trash2 size={20} />
+                      <Trash2 size={16} />
                     </button>
                   </div>
                 </div>
               ))}
-              {doneTasks.length === 0 && (
-                <div className="empty-state">
-                  <Circle size={32} />
-                  <span>No completed tasks yet.</span>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -199,5 +215,3 @@ function App() {
     </div>
   );
 }
-
-export default App;
